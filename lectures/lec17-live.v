@@ -8,7 +8,7 @@ Inductive formula : Set :=
 | Truth : formula
 | Falsehood : formula
 | And : formula -> formula -> formula
-| Or : formula -> formula -> formula
+| Or : formula -> formula -> formula.
 
 Definition asgn := nat -> Prop.
 
@@ -55,3 +55,32 @@ Section my_tauto.
   Qed.
 End my_tauto.
 
+Ltac position x ls :=
+  match ls with
+  | [] => constr:(@None nat)
+  | x :: _ => constr:(Some 0)
+  | _ :: ?ls' =>
+    let p := position x ls' in
+    match p with
+    | None => p
+    | Some ?n => constr:(Some (S n))
+    end
+  end.
+
+Ltac vars_in P acc :=
+  match P with
+  | True => acc
+  | False => acc
+  | ?Q1 /\ ?Q2 =>
+    let acc' := vars_in Q1 acc in
+    vars_in Q2 acc'
+  | ?Q1 \/ ?Q2 =>
+    let acc' := vars_in Q1 acc in
+    vars_in Q2 acc'
+  | _ =>
+    let pos := position P acc in
+    match pos with
+    | Some _ => acc
+    | None => constr:(P :: acc)
+    end
+  end.
