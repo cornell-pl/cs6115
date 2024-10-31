@@ -68,19 +68,23 @@ Ltac position x ls :=
   end.
 
 Ltac vars_in P acc :=
-  match P with
-  | True => acc
-  | False => acc
-  | ?Q1 /\ ?Q2 =>
-    let acc' := vars_in Q1 acc in
-    vars_in Q2 acc'
-  | ?Q1 \/ ?Q2 =>
-    let acc' := vars_in Q1 acc in
-    vars_in Q2 acc'
-  | _ =>
-    let pos := position P acc in
-    match pos with
-    | Some _ => acc
-    | None => constr:(P :: acc)
-    end
+  let t := type of P in
+  match type of P with
+    Prop =>
+      match P with
+      | True => acc
+      | False => acc
+      | ?Q1 /\ ?Q2 =>
+          let acc' := vars_in Q1 acc in
+          vars_in Q2 acc'
+      | ?Q1 \/ ?Q2 =>
+          let acc' := vars_in Q1 acc in
+          vars_in Q2 acc'
+      | _ =>
+          let pos := position P acc in
+          match pos with
+          | Some _ => acc
+          | None => constr:(P :: acc)
+          end
+      end
   end.
